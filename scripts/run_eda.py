@@ -14,6 +14,7 @@ def main():
         "--input-data-sep",
         type=str,
         required=False,
+        default=',',
         help="разделитель для CSV файла (например, ',' или ';')"
     )
     parser.add_argument(
@@ -26,7 +27,7 @@ def main():
     
     generate_eda_report(args.input_path, 
                         report_dir=args.report_dir, 
-                        sep=args.input_data_sep if args.input_data_sep else ',')
+                        sep=args.input_data_sep)
 
 if __name__ == "__main__":
     main()

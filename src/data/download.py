@@ -1,8 +1,8 @@
 # src/data/download.py
-import os
 import zipfile
 from pathlib import Path
 from kaggle.api.kaggle_api_extended import KaggleApi  # явный импорт
+import glob
 
 def download_kaggle_dataset(
     dataset_name: str,
@@ -42,5 +42,14 @@ def download_kaggle_dataset(
             print("Распаковка...")
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall(output_dir)
+                extracted_files = zip_ref.namelist()  # список файлов в архиве
             zip_path.unlink()  # безопасное удаление через pathlib
+            print("Извлечённые файлы:", extracted_files)
     print("Загрузка завершена.")
+
+    if extracted_files:
+        print(f"Найдено файлов для датасета {dataset_name}: {extracted_files[0]}")
+        return f"{output_dir}/{extracted_files[0]}"
+    else:
+        print("Файл не найден.")
+        raise FileNotFoundError(f"Файл не найден для датасета {dataset_name} в {output_dir}")
