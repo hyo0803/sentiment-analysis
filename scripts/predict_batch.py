@@ -1,7 +1,5 @@
 # scripts/predict_batch.py
 import argparse
-import pandas as pd # type: ignore
-
 from src.data.utils import load_data
 from src.models.classifier import SentimentClassifier
 
@@ -23,6 +21,7 @@ def main():
         "--input-data-sep",
         type=str,
         required=False,
+        default=',',
         help="разделитель для CSV файла (например, ',' или ';')"
     )
     parser.add_argument(
@@ -37,7 +36,7 @@ def main():
     # Загрузка данных
     df = load_data(args.input_path,
                    return_df=True,
-                   sep=args.input_data_sep if args.input_data_sep else ',')
+                   sep=args.input_data_sep)
 
     # Инференс
     clf = SentimentClassifier(model_path=args.model_path)
