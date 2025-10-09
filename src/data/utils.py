@@ -1,38 +1,6 @@
-import os
-import subprocess
-import sys
-import pkg_resources # type: ignore
 import pandas as pd # type: ignore
 from pathlib import Path
 import re
-
-def install_package(package):
-    """Установка или обновление пакета через pip."""
-    try:
-        # Пытаемся найти пакет в установленных
-        dist = pkg_resources.get_distribution(package)
-        # print(f"Пакет '{package}' найден (версия {dist.version}).")
-    except pkg_resources.DistributionNotFound:
-        print(f"Пакет '{package}' не найден. Установка...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-
-def setup_kaggle_config():
-    """Настройка конфигурационного файла Kaggle."""
-    kaggle_dir = os.path.expanduser("~/.kaggle")
-    kaggle_json_src = "config/kaggle.json"
-    kaggle_json_dst = os.path.join(kaggle_dir, "kaggle.json")
-
-    # Создаём директорию ~/.kaggle, если её нет
-    os.makedirs(kaggle_dir, exist_ok=True)
-
-    # Копируем файл конфигурации
-    if os.path.exists(kaggle_json_src):
-        import shutil
-        shutil.copy(kaggle_json_src, kaggle_json_dst)
-        # Устанавливаем права 600 (только владелец может читать и писать)
-        os.chmod(kaggle_json_dst, 0o600)
-    else:
-        raise FileNotFoundError(f"Файл конфигурации не найден: {kaggle_json_src}")
 
 def load_data(
     data_path: str,
@@ -52,9 +20,24 @@ def load_data(
         DataFrame или кортеж списков (texts, labels).
     """
     if data_path.lower().endswith('.csv'):
-        df = pd.read_csv(data_path, sep=sep)
+        try:
+            df = pd.read_csv(data_path, sep=sep)
+        except:
+            delims = [',', ';', '\t', '|']
+            delims.remove(sep)
+            for delim in delims:
+                try:
+                    df = pd.read_csv(data_path, sep=delim)
+                    print(f"Warning: Использован альтернативный разделитель '{delim}' для {data_path}")
+                    break
+                except:
+                    continue
+            else:
+                raise ValueError(f"Не удалось прочитать {data_path} с известными разделителями {delims + [sep]}")
+    
     elif data_path.lower().endswith('.xlsx'):
         df = pd.read_excel(data_path)
+        
     else:
         raise ValueError("Поддерживаемые форматы файлов: .csv, .xlsx")
     
@@ -93,7 +76,7 @@ def normalize_dataset(
     output_path: str,
     text_column: str,
     label_column: str,
-    label_mapping: dict = None,
+    label_mapping: dict = {"negative":0, "positive":1},
     input_sep: str = ',',
     output_sep: str = ','
 ) -> pd.DataFrame:
@@ -127,20 +110,8 @@ def normalize_dataset(
         raise ValueError(f"Колонка '{label_column}' не найдена в {input_path}")
     else:
         df["label"] = df[label_column]
-    
-    # Преобразование меток, если задано
-    if label_mapping is not None:
-        if not set(df["label"].unique()).issubset(set(label_mapping.keys())):
-            unknown_labels = set(df["label"].unique()) - set(label_mapping.keys())
-            raise ValueError(f"Неизвестные метки: {unknown_labels}. Ожидались: {list(label_mapping.keys())}")
-        df["label"] = df["label"].map(label_mapping)
-    
-    # Проверка: метки должны быть 0 или 1 (если не строковые категории)
-    unique_labels = df["label"].unique()
-    if not all(isinstance(l, (int, float)) and l in [0, 1] for l in unique_labels):
-        # Если после маппинга всё ещё не 0/1 — предупреждаем
-        print(f"Внимание: обнаружены метки, отличные от 0/1: {unique_labels}")
-        print("Убедитесь, что это ожидаемо (например, многоклассовая задача).")
+
+    df = df[df['label'].isin([label_mapping['negative'], label_mapping['positive']])]
     
     # Сохранение
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)

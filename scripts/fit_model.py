@@ -16,7 +16,7 @@ def main():
     parser.add_argument(
         "--model-path",
         type=str,
-        default="models/weights/sentiment_model.joblib",
+        default="src/models/weights/sentiment_model.joblib",
         help="Путь для сохранения обученной модели"
     )
     parser.add_argument(
@@ -28,6 +28,7 @@ def main():
     parser.add_argument( "--input-data-sep",
         type=str,
         required=False,
+        default=',',
         help="разделитель для CSV файла (например, ',' или ';')")
     
     args = parser.parse_args()
@@ -38,7 +39,7 @@ def main():
     # Загрузка и обучение
     texts, labels = load_data(
         args.data_path,
-        sep=args.input_data_sep if args.input_data_sep else ','
+        sep=args.input_data_sep
         )
     clf = SentimentClassifier(embedder=args.embedder)
     clf.fit(texts, labels)

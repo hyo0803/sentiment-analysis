@@ -39,7 +39,7 @@ class SentimentClassifier:
         print("Обучение завершено.")
     
     
-    def predict(self, texts):
+    def predict(self, texts, label_map={"negative":-1, "positive":1}):
         if self.classifier is None:
             raise ValueError("Модель не обучена и не загружена!")
         
@@ -53,7 +53,7 @@ class SentimentClassifier:
         predictions = self.classifier.predict(embeddings)
         
         # Преобразуем числовые метки в строки
-        label_map = {0: "negative", 1: "positive"}
+        label_map = {v: k for k, v in label_map.items()}# {0: "negative", 1: "positive"}
         if len(predictions) > 0 and isinstance(predictions[0], (int, np.integer)):
             predictions = [label_map.get(p, p) for p in predictions]
         

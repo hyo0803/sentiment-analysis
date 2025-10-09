@@ -1,11 +1,14 @@
 # src/data/eda.py
 import matplotlib.pyplot as plt # type: ignore
 from pathlib import Path
+import seaborn as sns # type: ignore
+import pandas as pd # type: ignore
+from typing import Union
 
-from src.data.utils import load_data, install_package
+from src.data.utils import load_data
 
 def generate_eda_report(
-    data_path: str,
+    data: Union[str, pd.DataFrame],
     report_dir: str = "data/reports",
     text_col: str = "text",
     label_col: str = "label",
@@ -14,12 +17,12 @@ def generate_eda_report(
     """
     Генерирует простой EDA-отчёт: длина текстов, баланс классов.
     """
-    install_package("seaborn")
-    install_package("pandas")
-    import seaborn as sns # type: ignore
-    import pandas as pd # type: ignore
-    
-    df = load_data(data_path, return_df=True, sep=sep)
+    if isinstance(data, str):
+        df = load_data(data, return_df=True, sep=sep)
+    elif isinstance(data, pd.DataFrame):
+        df = data
+    else:
+        raise ValueError(f"Некорректные данные")
     
     Path(report_dir).mkdir(parents=True, exist_ok=True)
     
