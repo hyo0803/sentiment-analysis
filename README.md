@@ -15,7 +15,7 @@
 
 ### 1. Клонируйте репозиторий
 ```bash
-git clone https://github.com/ваш-username/sentiment-classification-model.git
+git clone https://github.com/hyo0803/sentiment-analysis.git
 cd sentiment-classification-model
 ```
 
