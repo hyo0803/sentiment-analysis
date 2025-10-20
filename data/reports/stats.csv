@@ -1,9 +1,9 @@
 ,0
-dataset_shape,"(201765, 6)"
-dataset_attributes,"['id', 'text', 'sentiment', 'target', 'label', 'text_len']"
+dataset_shape,"[201765, 6]"
+dataset_attributes,"['id', 'text', 'sentiment', 'target', 'label', '_eda_text_len']"
 total_samples,201765
-dtypes,"{'id': dtype('int64'), 'text': dtype('O'), 'sentiment': dtype('O'), 'target': dtype('int64'), 'label': dtype('int64'), 'text_len': dtype('int64')}"
-missing_values,"{'id': 0, 'text': 0, 'sentiment': 0, 'target': 0, 'label': 0, 'text_len': 0}"
-class_counts,"{1: 102762, -1: 99003}"
-attribute_nunique_values,"{'id': 201765, 'text': 201762, 'sentiment': 2, 'target': 2, 'label': 2, 'text_len': 1500}"
+dtypes,"{'id': 'int64', 'text': 'object', 'sentiment': 'object', 'target': 'int64', 'label': 'int64', '_eda_text_len': 'int64'}"
+missing_values,"{'id': 0, 'text': 0, 'sentiment': 0, 'target': 0, 'label': 0, '_eda_text_len': 0}"
+class_counts,"{'1': 102762, '-1': 99003}"
+attribute_nunique_values,"{'id': 201765, 'text': 201762, 'sentiment': 2, 'target': 2, 'label': 2, '_eda_text_len': 1500}"
 avg_text_length,332.2863083289966

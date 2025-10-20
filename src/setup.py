@@ -35,5 +35,5 @@ def ensure_kaggle_config():
             )
         shutil.copy(src, dst)
         os.chmod(dst, 0o600)
-        print("✅ Конфигурация Kaggle настроена.")
+        print("Конфигурация Kaggle настроена.")
     

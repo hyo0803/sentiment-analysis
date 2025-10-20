@@ -1,0 +1,49 @@
+# params.yaml хранит все основные параметры пайплайна:
+# - пути к данным и моделям
+# - имена колонок в исходном CSV/XLSX
+# - маппинг меток
+# - параметры split/обучения
+# Это позволяет менять поведение пайплайна без правки кода.
+
+dataset:
+  # Поддерживаются формы: "user/dataset-name" или полный URL "https://www.kaggle.com/datasets/user/dataset-name"
+  name: "https://www.kaggle.com/datasets/yaseminkh/ru-eng-sentiment-analysis"
+  extract: true
+
+columns:
+  text: "text"
+  label: "label"
+
+# Можно указывать либо числовые ключи, либо строковые — парсер в коде попытается нормализовать
+label_mapping:
+  -1: 0
+  1: 1
+
+# Человеко-читаемая расшифровка меток
+label_text_mapping:
+  0: "negative"
+  1: "positive"
+
+paths:
+  data_dir: "data"
+  raw_data_dir: "data/raw"
+  normalized_data_path: ""        # если пусто — будет создан norm_<raw_filename> в raw
+  test_data_path: "data/test.csv"
+  reports_dir: "data/reports"
+  model_dir: "models/weights"
+  final_model_path: "models/weights/sentiment_model.joblib"
+  metrics_path: "data/reports/metrics.json"
+
+split:
+  test_size: 0.2
+  random_state: 42
+  stratify: true
+
+training:
+  model_type: "LinearSVC+SentenceTransformer"
+  max_iter: 10000
+  # дополнительные гиперпараметры при необходимости
+
+notes: >
+  central params file for the pipeline — edit instead of changing code.
+  Use yaml.safe_load(...) in scripts to read configuration.
