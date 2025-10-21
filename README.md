@@ -44,7 +44,7 @@ python -m scripts.run_pipeline
 - EDA → сохранение графиков в `data/reports/`
 - Обучение финальной модели
 - Оценку на тестовой выборке → метрики в `data/reports/metrics.json`
-- Сохранение модели → `model_weights/sentiment_model.joblib`
+- Сохранение модели → `models/weights/sentiment_model.joblib`
 
 ---
 
