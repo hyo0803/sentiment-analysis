@@ -190,10 +190,11 @@ def encode_labels(labels, label_map=None, clear_extra_classes=False):
 
 
 def normalize_dataset(
-    input_path: str,
-    output_path: str,
     text_column: str,
     label_column: str,
+    input_path: str = None,
+    output_path: str = None,
+    data: pd.DataFrame = None,
     label_mapping: dict = None,
     clear_extra_classes: bool = False,
     input_sep: str = ',',
@@ -207,8 +208,13 @@ def normalize_dataset(
               или оставляет только два класса если label_mapping=None (но в таком случае лучше задать label_mapping).
       - False: при обнаружении неизвестных меток — выбрасывается ошибка.
     """
-    # Загрузка
-    df = load_data(input_path, return_df=True, sep=input_sep, check_text_column=False)
+    if data is None and input_path:
+        # Загрузка
+        df = load_data(input_path, return_df=True, sep=input_sep, check_text_column=False)
+    elif isinstance(data, pd.DataFrame) and data.empty==False and not input_path:
+        df = data
+    else:
+        raise FileNotFoundError("Данные не найдены! Проверьте корректность пути файла или корректность датафрейма")
     
     # Проверка наличия колонок + Выбираем нужные колонки и создаём стандартные имена
     if text_column not in df.columns:
@@ -244,9 +250,10 @@ def normalize_dataset(
     df["label"] = encoded.astype(int)
 
     # Сохранение
-    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(output_path, index=False, sep=output_sep, encoding='utf-8')
-    print(f"Нормализованный датасет сохранён: {output_path}")
+    if output_path:
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(output_path, index=False, sep=output_sep, encoding='utf-8')
+        print(f"Нормализованный датасет сохранён: {output_path}")
     print(f"Примеры:\n{df.head()}")
 
     return df
@@ -348,3 +355,30 @@ def parse_label_mapping(mapping_str: Optional[Union[str, Dict[Any, Any]]]):
                     pass
         norm[nk] = nv
     return norm
+
+def ensure_list_for_df(x, length):
+    """Гарантирует, что x представлен как список длины length (распространяет скаляр при необходимости)."""
+    if x is None:
+        return [None] * length
+    # numpy scalar or python scalar
+    if isinstance(x, (np.generic, int, float, str)):
+        return [to_python_ints(x)] * length
+    try:
+        lst = list(x)
+    except Exception:
+        return [x] * length
+    if len(lst) == length:
+        return lst
+    if len(lst) == 1:
+        return lst * length
+    return [to_python_ints(el) for el in lst]
+
+def map_pred_to_text(pred, mapping):
+    """Безопасная текстовая расшифровка метки через mapping."""
+    if mapping is None:
+        return str(pred)
+    try:
+        key = int(pred)
+    except Exception:
+        key = pred
+    return mapping.get(key, mapping.get(str(key), str(pred)))

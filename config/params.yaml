@@ -13,11 +13,16 @@ dataset:
 columns:
   text: "text"
   label: "label"
+  prediction: "prediction"
 
 # Можно указывать либо числовые ключи, либо строковые — парсер в коде попытается нормализовать
 label_mapping:
   -1: 0
   1: 1
+
+evaluate:
+  pos_label: 1
+  label_list: [0,1]
 
 # Человеко-читаемая расшифровка меток
 label_text_mapping:

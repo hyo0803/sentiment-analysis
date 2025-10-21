@@ -3,37 +3,17 @@
 import argparse
 import json
 from pathlib import Path
-from src.data.utils import load_data, to_python_ints, parse_label_mapping
+from src.data.utils import (
+    load_data,
+    to_python_ints,
+    parse_label_mapping,
+    ensure_list_for_df,
+    map_pred_to_text
+    )
 from src.models.classifier import SentimentClassifier
 from src.config.utils import load_config
 import numpy as np # type: ignore
 
-def _ensure_list_for_df(x, length):
-    """Гарантирует, что x представлен как список длины length (распространяет скаляр при необходимости)."""
-    if x is None:
-        return [None] * length
-    # numpy scalar or python scalar
-    if isinstance(x, (np.generic, int, float, str)):
-        return [to_python_ints(x)] * length
-    try:
-        lst = list(x)
-    except Exception:
-        return [x] * length
-    if len(lst) == length:
-        return lst
-    if len(lst) == 1:
-        return lst * length
-    return [to_python_ints(el) for el in lst]
-
-def _map_pred_to_text(pred, mapping):
-    """Безопасная текстовая расшифровка метки через mapping."""
-    if mapping is None:
-        return str(pred)
-    try:
-        key = int(pred)
-    except Exception:
-        key = pred
-    return mapping.get(key, mapping.get(str(key), str(pred)))
 
 def main():
     parser = argparse.ArgumentParser(description="Батч-инференс модели тональности")
@@ -95,7 +75,7 @@ def main():
 
     # Приводим прогнозы/вероятности к питоновским типам и спискам длины df
     preds_py_raw = to_python_ints(preds)
-    preds_list = _ensure_list_for_df(preds_py_raw, len(df))
+    preds_list = ensure_list_for_df(preds_py_raw, len(df))
 
     if probas is not None:
         probas_arr = np.asarray(probas)
@@ -103,7 +83,7 @@ def main():
             probas_py = probas_arr.tolist()
         except Exception:
             probas_py = list(probas_arr)
-        probas_list = _ensure_list_for_df(probas_py, len(df))
+        probas_list = ensure_list_for_df(probas_py, len(df))
     else:
         probas_list = [None] * len(df)
 
@@ -113,7 +93,7 @@ def main():
 
     # Текстовая расшифровка метки (если задана)
     if label_text_map:
-        df["prediction_str"] = [_map_pred_to_text(p, label_text_map) for p in preds_list]
+        df["prediction_str"] = [map_pred_to_text(p, label_text_map) for p in preds_list]
 
     out_path = Path(output_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

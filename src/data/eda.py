@@ -135,19 +135,19 @@ def compute_classification_metrics(
         metrics_path = Path(metrics_path)
         metrics_path.parent.mkdir(parents=True, exist_ok=True)
 
-    y_true_arr = np.asarray(y_true).ravel()
-    y_pred_arr = np.asarray(y_pred).ravel()
+    y_true_arr = np.asarray(y_true)#.ravel()
+    y_pred_arr = np.asarray(y_pred)#.ravel()
 
     metrics = {}
     metrics["accuracy"] = float(accuracy_score(y_true_arr, y_pred_arr))
     metrics["precision"] = float(precision_score(y_true_arr, y_pred_arr, zero_division=0))
     metrics["recall"] = float(recall_score(y_true_arr, y_pred_arr, zero_division=0))
-    metrics["f1"] = float(f1_score(y_true_arr, y_pred_arr, zero_division=0))
+    metrics["f1"] = float(f1_score(y_true_arr, y_pred_arr,zero_division=0))
 
     roc_auc_val = None
     if y_score is not None:
         try:
-            y_score_arr = np.asarray(y_score).ravel()
+            y_score_arr = np.asarray(y_score)#.ravel()
             roc_auc_val = float(roc_auc_score(y_true_arr, y_score_arr))
             metrics["roc_auc"] = roc_auc_val
         except Exception:

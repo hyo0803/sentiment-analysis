@@ -33,6 +33,7 @@ End-to-end пайплайн машинного обучения для бина�
 """
 
 import sys
+import re
 import pandas as pd # type: ignore
 from pathlib import Path
 from sklearn.model_selection import train_test_split # type: ignore
@@ -268,13 +269,12 @@ def main():
 
     # --- 12. Сохранение модели (с версионированием, если файл уже есть) ---
     print("|- Шаг 9: Сохранение финальной модели...")
-    # FINAL_MODEL_PATH = FINAL_MODEL_PATH
-    if FINAL_MODEL_PATH.exists():
+    final_model_path = FINAL_MODEL_PATH
+    if final_model_path.exists():
         print("|-- Файл уже существует!")
         MODEL_NAME = FINAL_MODEL_PATH.stem
         MODEL_format = FINAL_MODEL_PATH.suffix.lstrip('.')
         # Поведение версионирования: добавляем _vN перед расширением
-        import re
         m = re.search(r"(.*)_v(\d+)$", MODEL_NAME)
         if m:
             base = m.group(1)
@@ -283,11 +283,11 @@ def main():
             base = MODEL_NAME
             version = 2
         new_filename = f"{base}_v{version}.{MODEL_format}"
-        FINAL_MODEL_PATH = FINAL_MODEL_PATH.parent / new_filename
-        print(f"|-- Сохранение новой версии как: {FINAL_MODEL_PATH}")
+        final_model_path = final_model_path.parent / new_filename
+        print(f"|-- Сохранение новой версии как: {final_model_path}")
 
-    final_model.save_model(str(FINAL_MODEL_PATH))
-    print(f"|-- Финальная модель сохранена: {FINAL_MODEL_PATH}")
+    final_model.save_model(str(final_model_path))
+    print(f"|-- Финальная модель сохранена: {final_model_path}")
 
     print("\n🎉 Пайплайн успешно завершён! Все результаты воспроизведены.")
 
