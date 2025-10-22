@@ -89,7 +89,8 @@ def main():
             except TypeError:
                 preds = model.predict(texts)
         pred = _ensure_first(preds)
-
+        
+        print(text, pred)
         # попытка получить вероятности
         try:
             probas = model.predict_proba(texts)

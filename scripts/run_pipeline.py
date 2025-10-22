@@ -33,7 +33,6 @@ End-to-end пайплайн машинного обучения для бина�
 """
 
 import sys
-import re
 import pandas as pd # type: ignore
 from pathlib import Path
 from sklearn.model_selection import train_test_split # type: ignore
@@ -57,10 +56,10 @@ DATASET_NAME = cfg.get("dataset", {}).get("name", "https://www.kaggle.com/datase
 
 # columns
 ORIGINAL_TEXT_COLUMN = cfg.get("columns", {}).get("text", "text")
-ORIGINAL_LABEL_COLUMN = cfg.get("columns", {}).get("label", "target")
+ORIGINAL_LABEL_COLUMN = cfg.get("columns", {}).get("label", "label")
 
 # label mappings / cleaning
-LABEL_MAPPING = cfg.get("label_mapping", {-1: 0, 1: 1})
+# LABEL_MAPPING = cfg.get("label_mapping", {0: 0, 1: 1})
 LABEL_TEXT_MAPPING = cfg.get("label_text_mapping", {0: "negative", 1: "positive"})
 CLEAR_EXTRA_CLASSES = cfg.get("clear_extra_classes", True)
 
@@ -168,9 +167,7 @@ def main():
             input_path=str(raw_data_path),
             output_path=str(normalized_output_path),
             text_column=ORIGINAL_TEXT_COLUMN,
-            clear_extra_classes=CLEAR_EXTRA_CLASSES,
             label_column=ORIGINAL_LABEL_COLUMN,
-            label_mapping=LABEL_MAPPING,
             input_sep=",",
             output_sep=","
         )
@@ -215,7 +212,7 @@ def main():
 
     X_test = test_df[ORIGINAL_TEXT_COLUMN].values
     y_test = test_df[ORIGINAL_LABEL_COLUMN].values
-
+    
     # --- 8. Обучение модели ---
     print("|- Шаг 5: Обучение лучшей модели (SentenceTransformer + LinearSVC)...")
     model = SentimentClassifier()
@@ -243,8 +240,8 @@ def main():
             # fallback: используем предсказанные метки как скор (плохо, но позволяет посчитать roc_auc при отсутствии probas)
             y_score = np.asarray(y_pred, dtype=float).ravel()
 
-    # Конвертация предсказаний в числа для метрик
-    y_pred = np.asarray(y_pred).astype(int).ravel().tolist()
+    # # Конвертация предсказаний в числа для метрик
+    # y_pred = np.asarray(y_pred).astype(int).ravel().tolist()
 
     # --- 10. Расчёт метрик (выполняется и сохраняется в compute_classification_metrics) ---
     print("|- Шаг 7: Расчёт метрик...")
@@ -272,9 +269,10 @@ def main():
     final_model_path = FINAL_MODEL_PATH
     if final_model_path.exists():
         print("|-- Файл уже существует!")
-        MODEL_NAME = FINAL_MODEL_PATH.stem
-        MODEL_format = FINAL_MODEL_PATH.suffix.lstrip('.')
+        MODEL_NAME = final_model_path.stem
+        MODEL_format = final_model_path.suffix.lstrip('.')
         # Поведение версионирования: добавляем _vN перед расширением
+        import re
         m = re.search(r"(.*)_v(\d+)$", MODEL_NAME)
         if m:
             base = m.group(1)
